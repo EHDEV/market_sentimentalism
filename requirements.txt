@@ -1,0 +1,16 @@
+numpy
+flask
+google-api-python-client
+pandas
+scipy
+oauthlib
+isodate
+arrow
+requests
+tweepy
+facepy
+xlrd
+pytz
+beautifulsoup4
+redis
+celery

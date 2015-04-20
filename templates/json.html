@@ -1,0 +1,72 @@
+{% block includes %}
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+{% endblock %}
+
+{% block body %}
+
+<script type="text/javascript">
+    var d = JSON.parse('{{ dictionary | safe}}');
+
+    var cat = Object.keys(d);
+    var data = [];
+
+    for (var key in d)  {
+        console.log(key);
+        data.push(d[key]['score'])
+    }
+
+
+    $(document).ready(
+        $(function () {
+            $('#container').highcharts({
+                title: {
+                    text: 'Daily News Sentiment of Apple Inc.',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Yahoo Finance, News. Sentiment Score Calculated using AlchemyAPI',
+                    x: -20
+                },
+                xAxis: {
+                    categories: cat
+                },
+                yAxis: {
+                    title: {
+                        text: 'Seniment Score'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: '°C'
+                },
+                credits: {
+                    enabled: false
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle',
+                    borderWidth: 0
+                },
+                series: [{
+                    name: 'News Sentiment Score',
+                    data: data
+                }]
+            });
+        }))
+</script>
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<div>
+{{ dictionary }}
+</div>
+{% endblock %}
