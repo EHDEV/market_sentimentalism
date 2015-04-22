@@ -116,6 +116,11 @@ def get_sentiment(ticker=None):
 
         score_dict[dl]['score'] = etl.aggregate_news_sentiment(articles)
 
+    file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily.json')
+
+    with open(file_path, 'w+') as file:
+        json.dump(score_dict, file)
+
     if ticker:
         print 'ticker is ', ticker
 
@@ -180,8 +185,14 @@ def tw(search_term='AAPL', date=str(datetime.date.today())):
     for dt in d:
         twits_bydate[dt] = etl.collect_historical_tweets(d[dt])
 
+
     return render_template('default.html', data=json.dumps(twits_bydate, ensure_ascii=True))
 
+
+@app.route('/test/')
+def test():
+    d = etl.prepare_data_for_modeling()
+    return d
 
 if __name__ == '__main__':
     app.run()

@@ -9,13 +9,16 @@ import re
 from alchemyapi import AlchemyAPI
 import json
 import numpy as np
+from flask import request
+from os import path
+import csv
+from collections import defaultdict
 
 
-
-def get_quotes(url):
+def get_quotes(start_date='2015-04-01', end_date='2015-04-21', ticker='AAPL'):
     # ud = u.urlopen('http://ichart.yahoo.com/table.csv?s=GOOG&a=0&b=2&c=2015&d=17&e=3&f=2015')
 
-    d = r.get('http://ichart.yahoo.com/table.csv?s=GOOG&a=0&b=2&c=2015&d=17&e=3&f=2015')
+    d = r.get('http://ichart.yahoo.com/table.csv?s=AAPL&a=01&b=04&c=2015&d=21&e=04&f=2015')
 
     dat = d.content
 
@@ -87,6 +90,7 @@ def collect_historical_tweets(url):
 
     return twits_list
 
+
 def aggregate_news_sentiment(news_urls):
     alchemyapi = AlchemyAPI()
 
@@ -97,7 +101,6 @@ def aggregate_news_sentiment(news_urls):
 
         print ("Processing, " + link)
         response = alchemyapi.sentiment('url', link)
-        print(json.dumps(response))
         del (response['usage'])
 
         if response['status'] == 'OK' and response.get('docSentiment', {}).get('type', '') != 'neutral':
@@ -112,7 +115,7 @@ def aggregate_news_sentiment(news_urls):
 
 def news_scrape(rurl):
     links = []
-    rss = requests.get(rurl)
+    rss = r.get(rurl)
 
     soup = BeautifulSoup(rss.text)
 
@@ -139,3 +142,54 @@ def news_scrape(rurl):
     print (links)
 
     return links
+
+
+def prepare_data_for_modeling():
+    sent_formatted = {}
+
+    try:
+        file_path = path.join(path.dirname(__file__), 'data/goog_trends.csv')
+        goog_df = p.read_csv(file_path)
+
+    except IOError as e:
+        print e.message
+
+    try:
+        file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily.json')
+
+        with open(file_path) as fp:
+            sent_dict = json.load(fp)
+
+    except IOError as e:
+        print e.message
+        exit()
+
+    try:
+        file_path = path.join(path.dirname(__file__), 'data/yahoo_quotes.csv')
+        quotes_df = p.read_csv(file_path)
+
+    except IOError as e:
+        print e.message
+
+    for dtk in sent_dict:
+        sent_formatted[dtk] = sent_dict[dtk]['score']
+
+    sent_df = p.DataFrame(sent_formatted, index=sent_formatted.keys())
+
+    sent_df.columns = ['score']
+
+    df_partial = p.merge(goog_df, sent_df, left_on='date', right_index=True, how='inner')
+
+    df_fuller = p.merge(df_partial, quotes_df, left_on='date', right_on='Date', how='inner')
+
+    del df_fuller['Date']
+
+    # try:
+    #     file_path = path.join(path.dirname(__file__), 'data/goog_trends.csv')
+    #     quotes = p.read_csv(file_path)
+    #
+    # except IOError as e:
+    #     print e.message
+
+    return df_fuller
+
