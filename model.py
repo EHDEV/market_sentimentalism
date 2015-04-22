@@ -10,9 +10,20 @@ def manage():
 
     data = etl.prepare_data_for_modeling()
 
-    data = normalize(data)
+    data = normalize_matrix(data)
 
 
-def normalize(data):
 
-    pass
+
+def normalize_matrix(data):
+
+    data_m = data.values
+
+    for c in range(data_m.shape[1]):
+
+        col = (data_m[:, c] - np.min(data_m[:, c])) / (np.max(data_m[:, c]) - np.min(data_m[:, c]))
+
+        data_m[:, c] = col
+
+    return data_m
+
