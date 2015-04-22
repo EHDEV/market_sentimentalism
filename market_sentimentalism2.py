@@ -193,7 +193,7 @@ def tw(search_term='AAPL', date=str(datetime.date.today())):
 @app.route('/test/')
 def test():
     d = etl.prepare_data_for_modeling()
-    res = model.manage(d)
+    res = model.linear_reg(d)
 
     return render_template('default.html', data=json.dumps(res))
 

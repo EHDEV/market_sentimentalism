@@ -5,7 +5,8 @@ import pandas as p
 from sklearn import linear_model, svm, tree
 import etl
 
-def manage(data):
+
+def linear_reg(data):
 
     # data = etl.prepare_data_for_modeling()
 
