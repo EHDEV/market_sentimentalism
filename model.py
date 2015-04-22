@@ -37,9 +37,22 @@ def linear_reg(data):
     stats = {'coefs': np.round(lr.coef_, 4).tolist(),
              'rmse': np.round(np.sqrt((lr.predict(xtest) - ytest) ** 2)[0], 4),
              'variance score': lr.score(xtest, ytest),
-             'Actual': np.round(ytest[0]),
-             'Predicted': np.round(lr.predict(xtest)[0])
+             'actual': np.round(ytest[0]),
+             'predicted': np.round(lr.predict(xtest)[0])
              }
+
+    percentage_diff = (stats['predicted'] - stats['actual']) / stats['actual']
+
+    if percentage_diff > .025:
+        recom = 1
+
+    elif percentage_diff < -.025:
+        recom = 0
+
+    else:
+        recom = -1
+
+    stats['recommendation'] = recom
 
     return stats
 
