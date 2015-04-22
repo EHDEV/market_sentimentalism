@@ -145,7 +145,7 @@ def news_scrape(rurl):
 
 
 def prepare_data_for_modeling():
-    sent_formatted = {}
+    sent_formatted = {'date': [], 'score': []}
 
     try:
         file_path = path.join(path.dirname(__file__), 'data/goog_trends.csv')
@@ -155,7 +155,7 @@ def prepare_data_for_modeling():
         print e.message
 
     try:
-        file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily_train.json')
+        file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily.json')
 
         with open(file_path) as fp:
             sent_dict = json.load(fp)
@@ -172,18 +172,18 @@ def prepare_data_for_modeling():
         print e.message
 
     for dtk in sent_dict:
-        sent_formatted[dtk] = sent_dict[dtk]['score']
+        sent_formatted['date'] += [dtk]
+        sent_formatted['score'] += [np.round(sent_dict[dtk]['score'], 2)]
 
-    sent_df = p.DataFrame(sent_formatted, index=sent_formatted.keys())
+    sent_df = p.DataFrame(sent_formatted)
 
-    sent_df.columns = ['score']
-
-    df_partial = p.merge(goog_df, sent_df, left_on='date', right_index=True, how='inner')
+    df_partial = p.merge(goog_df, sent_df, left_on='date', right_on='date', how='inner')
 
     df_fuller = p.merge(df_partial, quotes_df, left_on='date', right_on='Date', how='inner')
 
     del df_fuller['Date']
 
+    df_fuller = df_fuller.set_index('date')
     # try:
     #     file_path = path.join(path.dirname(__file__), 'data/goog_trends.csv')
     #     quotes = p.read_csv(file_path)
@@ -191,5 +191,8 @@ def prepare_data_for_modeling():
     # except IOError as e:
     #     print e.message
 
+    file_path = path.join(path.dirname(__file__), 'data/train_test_complete.csv')
+
+    df_fuller.to_csv(file_path)
     return df_fuller
 

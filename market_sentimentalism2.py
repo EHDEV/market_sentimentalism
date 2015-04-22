@@ -10,6 +10,7 @@ import etl
 import datetime
 from facebook_etl import *
 from flask import request
+import model
 
 
 app = Flask(__name__)
@@ -192,7 +193,9 @@ def tw(search_term='AAPL', date=str(datetime.date.today())):
 @app.route('/test/')
 def test():
     d = etl.prepare_data_for_modeling()
-    return d
+    res = model.manage(d)
+
+    return render_template('default.html', data=json.dumps(res))
 
 if __name__ == '__main__':
     app.run()
