@@ -1,0 +1,40 @@
+{
+  "id": "105596369475033", 
+  "can_post": false, 
+  "category": "Company", 
+  "category_list": [
+    {
+      "id": "139823692748565", 
+      "name": "Computers & Electronics"
+    }, 
+    {
+      "id": "151676848220295", 
+      "name": "Education"
+    }
+  ], 
+  "checkins": 169572, 
+  "description": "Apple Inc. is an American multinational corporation headquartered in Cupertino, California, that designs, develops, and sells consumer electronics, computer software, online services, and personal computers. Its best-known hardware products are the Mac line of computers, the iPod media player, the iPhone smartphone, the iPad tablet computer, and the Apple Watch smartwatch. Its online services include iCloud, the iTunes Store, and the App Store. Apple's consumer software includes the OS X and iOS operating systems, the iTunes media browser, the Safari web browser, and the iLife and iWork creativity and productivity suites.Apple was founded by Steve Jobs, Steve Wozniak, and Ronald Wayne on April 1, 1976, to develop and sell personal computers. It was incorporated as Apple Computer, Inc. on January 3, 1977, and was renamed as Apple Inc. on January 9, 2007, to reflect its shifted focus towards consumer electronics. Apple (NASDAQ:APPL) joined the Dow Jones Industrial Average on March 19, 2015.", 
+  "has_added_app": false, 
+  "is_community_page": true, 
+  "is_published": true, 
+  "likes": 9192040, 
+  "link": "https://www.facebook.com/pages/Apple-Inc/105596369475033", 
+  "location": {
+    "city": "Cupertino", 
+    "country": "United States", 
+    "latitude": 37.33158849705, 
+    "longitude": -122.03065555422, 
+    "state": "CA", 
+    "street": "1 Infinite Loop", 
+    "zip": "95014"
+  }, 
+  "name": "Apple Inc.", 
+  "parking": {
+    "lot": 0, 
+    "street": 0, 
+    "valet": 0
+  }, 
+  "phone": "(408) 996-1010", 
+  "talking_about_count": 5811, 
+  "were_here_count": 169572
+}

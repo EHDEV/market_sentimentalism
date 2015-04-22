@@ -4,6 +4,12 @@ import pandas as p
 import requests as r
 from StringIO import StringIO
 import datetime
+from bs4 import BeautifulSoup
+import re
+from alchemyapi import AlchemyAPI
+import json
+import numpy as np
+
 
 
 def get_quotes(url):
@@ -31,7 +37,6 @@ def construct_search_url_goog(start_date, end_date):
     date_list = [end_date - datetime.timedelta(days=x) for x in range(1, (end_date - start_date).days + 1)]
 
     for d in date_list:
-
         g_url = 'https://www.google.com/finance/company_news?q=NASDAQ%3AAAPL&startdate={0}&enddate={0}'.format(
             str(d.date()))
 
@@ -39,15 +44,98 @@ def construct_search_url_goog(start_date, end_date):
 
     return url_dict
 
-def construct_search_url_yh(start_date, end_date=datetime.date.today()):
+
+def construct_search_url_yh(start_date, end_date=datetime.date.today(), ticker='AAPL'):
+    url_dict = {}
+    date_list = [end_date.date() - datetime.timedelta(days=x) for x in range(1, (end_date - start_date).days + 1)]
+
+    for d in date_list:
+        g_url = "http://finance.yahoo.com/q/h?s={0}&t={1}".format(
+            ticker, str(d))
+
+        url_dict[str(d)] = g_url
+
+    return url_dict
+
+
+def construct_search_url_tw(search_term, start_date, end_date=datetime.date.today()):
     url_dict = {}
     date_list = [end_date - datetime.timedelta(days=x) for x in range(1, (end_date - start_date).days + 1)]
 
-    for d in date_list:
+    end_date = start_date + datetime.timedelta(days=1)
 
-        g_url = "http://finance.yahoo.com/q/h?s=AAPL&t={0}".format(
-            str(d.date()))
+    for i, d in enumerate(date_list):
+        g_url = "https://twitter.com/search?q={0}%20from%3Ayahoofinance%20since%3A{1}%20until%3A{2}&src=typd".format(
+            search_term, start_date, end_date)
+        start_date = end_date
+        end_date = start_date + datetime.timedelta(days=1)
 
-        url_dict[str(d.date())] = g_url
+        url_dict[str(d)] = g_url
 
     return url_dict
+
+
+def collect_historical_tweets(url):
+    req = r.get(url)
+    beatw = BeautifulSoup(req.text)
+    twits_list = []
+
+    for pa in beatw.find_all('p'):
+        # print pa.get('class', None)
+        if pa.get('class', [''])[0] == "js-tweet-text":
+            twits_list += [str(pa)]
+
+    return twits_list
+
+def aggregate_news_sentiment(news_urls):
+    alchemyapi = AlchemyAPI()
+
+    agg_sentiment = 0.0
+    sscores = []
+
+    for link in news_urls:
+
+        print ("Processing, " + link)
+        response = alchemyapi.sentiment('url', link)
+        print(json.dumps(response))
+        del (response['usage'])
+
+        if response['status'] == 'OK' and response.get('docSentiment', {}).get('type', '') != 'neutral':
+            sscores += [float(response.get('docSentiment', {}).get('score'))]
+
+    agg_sentiment = np.sum(sscores)
+
+    print (agg_sentiment)
+
+    return agg_sentiment
+
+
+def news_scrape(rurl):
+    links = []
+    rss = requests.get(rurl)
+
+    soup = BeautifulSoup(rss.text)
+
+    for l in soup.find_all('a'):
+        # print(l)
+        lhr = l['href']
+        mtch = re.search("\*http://.+?\"", lhr)
+
+        try:
+            url = mtch.group()
+            links += [url[1:-1]]
+
+        except AttributeError:
+            mtch = re.search('http:\/\/finance.yahoo.com\/news.+\.html', lhr)
+            try:
+                url = mtch.group()
+                links += [url]
+            except AttributeError:
+                continue
+
+            print("Regex Error, " + str(l))
+            continue
+
+    print (links)
+
+    return links

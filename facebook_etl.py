@@ -1,15 +1,24 @@
 __author__ = 'eliashussen'
+
 from facepy import GraphAPI
+import datetime
+import json
+from os import path
 
-# Initialize the Graph API with a valid access token (optional,
-# but will allow you to do all sorts of fun stuff).
-graph = GraphAPI(oauth_access_token)
+def get_fb_page(pageid, access_token):
 
-# Get my latest posts
-graph.get('me/posts')
+    today = str(datetime.date.today())
 
-# Post a photo of a parrot
-graph.post(
-    path = 'me/photos',
-    source = open('parrot.jpg', 'rb')
-)
+    graph = GraphAPI(access_token)
+
+    file_path = path.join(path.dirname(__file__), 'data/fb_page_response_' + today + '.json')
+
+    data = graph.get('/v2.3/{0}/'.format(pageid))
+
+    data['location']['longitude'] = float(data['location']['longitude'])
+    data['location']['latitude'] = float(data['location']['latitude'])
+
+    with open(file_path, 'w+') as file_name:
+        json.dump(data, file_name)
+
+    return data

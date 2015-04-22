@@ -8,31 +8,17 @@ import re
 import numpy as np
 import etl
 import datetime
+from facebook_etl import *
+from flask import request
 
 
 app = Flask(__name__)
 
 # url_for('static', filename='style.css')
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
 
-
-@app.route('/hello/')
-@app.route('/hello/<name>')
-def hello(name=None):
-    return render_template('test_test.html', name=name)
-
-@app.route('/post/<int:post_id>/')
-def post(post_id):
-    if post_id == 12:
-        return '12 is returned'
-    else:
-        return 'post is not 12'
 
 def sentiment_alchemy(url):
-
     alchemyapi = AlchemyAPI()
 
     response = alchemyapi.sentiment('url', url)
@@ -50,7 +36,7 @@ def sentiment_alchemy(url):
         print('Error in author extraction call: ', response['statusInfo'])
 
     response = alchemyapi.keywords('url', url)
-    del(response['usage'])
+    del (response['usage'])
 
     if response['status'] == 'OK':
         print('## Response Object ##')
@@ -79,20 +65,19 @@ def news_scrape_goog(nurl):
         # print(l)
         li = l['href']
 
-            #print k['href']
+        # print k['href']
 
-        t = re.search('url=.+', str(k))
+        t = re.search('url=.+', str(l))
         if t:
             t = t.group()
             t = re.search('.+?\&amp', t)
             t = t.group()
             t = t.replace('&amp', '').replace('url=', '')
             print t
-            print k.contents[0]
 
         else:
-            continue
             mtch = re.search("\*.+", l.text)
+            continue
         try:
             url = mtch.group()
             links += [url[1:]]
@@ -104,124 +89,98 @@ def news_scrape_goog(nurl):
 
     return links
 
-
-def news_scrape(rurl):
-
-    links = []
-    rss = requests.get(rurl)
-
-    soup = BeautifulSoup(rss.text)
-
-    for l in soup.find_all('a'):
-        # print(l)
-        lhr = l['href']
-        mtch = re.search("\*http://.+?\"", lhr)
-
-        try:
-            url = mtch.group()
-            links += [url[1:-1]]
-
-        except AttributeError:
-            mtch =re.search('http:\/\/finance.yahoo.com\/news.+\.html', lhr)
-            try:
-                url = mtch.group()
-                links += [url]
-            except AttributeError:
-                continue
-
-            print("Regex Error, " + str(l))
-            continue
-
-    print (links)
-
-    return links
-
-def aggregate_news_sentiment(news_urls):
-    alchemyapi = AlchemyAPI()
-
-    agg_sentiment = 0.0
-    sscores = []
-
-    for link in news_urls:
-
-        print ("Processing, " + link)
-        response = alchemyapi.sentiment('url', link)
-        print(json.dumps(response))
-        del(response['usage'])
-
-        if response['status'] == 'OK' and response.get('docSentiment', {}).get('type', '') != 'neutral':
-
-            sscores += [float(response.get('docSentiment', {}).get('score'))]
-
-    agg_sentiment = np.sum(sscores)
-
-    print (agg_sentiment)
-
-    return agg_sentiment
-
 @app.route('/sentiment/<ticker>/')
 def get_sentiment(ticker=None):
-
     score_dict = {}
 
-    # url = "http://www.cnbc.com/id/102595050?__source=yahoo%7cfinance%7cheadline%7cheadline%7cstory&par=yahoo&doc=102595050"
-    #
-    # rss_feed_aapl = "http://finance.yahoo.com/q/h?s=AAPL&t=2015-03-27"
-    # rss_feed_nasdaq = "feeds.finance.yahoo.com/rss/headline?s=^IXIC"
-    # rss_feed_goog = "feeds.finance.yahoo.com/rss/headline?s=goog"
-    # rss_feed_sandp = "feeds.finance.yahoo.com/rss/headline?s=^gspc"
-    # rss_feed_dow = "feeds.finance.yahoo.com/rss/headline?s=^DJI"
+    start_date = request.args.get('start_date', None)
+    end_date = request.args.get('end_date', None)
 
-    # sentiment_alchemy(url)
+    if not start_date:
+        start_date = datetime.datetime(2015, 04, 01)
+    else:
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
 
-    urls_dict = etl.construct_search_url_yh(datetime.datetime(2015, 04, 01), datetime.datetime(2015, 04, 11))
+    if not end_date:
+        end_date = start_date + datetime.timedelta(days=1)
+
+    else:
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+
+    urls_dict = etl.construct_search_url_yh(start_date, end_date)
 
     for dl in urls_dict:
-
-        articles = news_scrape(urls_dict[dl])
+        articles = etl.news_scrape(urls_dict[dl])
 
         score_dict[dl] = {'articles': articles}
 
-        score_dict[dl]['score'] = aggregate_news_sentiment(articles)
+        score_dict[dl]['score'] = etl.aggregate_news_sentiment(articles)
 
     if ticker:
         print 'ticker is ', ticker
 
-    # aapl_news_urls = news_scrape(rss_feed_aapl)
-    #
-    # appl_score = aggregate_news_sentiment(aapl_news_urls)
-    # goog_score = aggregate_news_sentiment(aapl_news_urls)
-    # nasdaq_score = aggregate_news_sentiment(aapl_news_urls)
-    # sandp_score = aggregate_news_sentiment(aapl_news_urls)
-    # dow_score = aggregate_news_sentiment(aapl_news_urls)
-
-    return render_template('json.html', dictionary=json.dumps(score_dict, ensure_ascii=False))
-
-@app.route('/test/')
-def test():
-
-    score_dict = {}
-
-    url = 'http://ichart.yahoo.com/table.csv?s=GOOG&a=0&b=1&c=2000&d=0&e=31&f=2010'
-
-    gurl = 'https://www.google.com/finance/company_news?q=NASDAQ%3AAAPL&startdate=2015-3-01&enddate=2015-3-01'
-
-    urls_dict = etl.construct_search_url_goog(datetime.datetime(2015, 04, 01), datetime.datetime(2015, 04, 02))
-
-    for dl in urls_dict:
-
-        articles = news_scrape_goog(urls_dict[dl])
-
-        score_dict[dl] = {'articles': articles}
-
-        score_dict[dl]['score'] = aggregate_news_sentiment(articles)
-
-    # d = etl.get_quotes(url)
-
-    return render_template('json.html', dictionary=score_dict)
+    return render_template('highcharts1.html', dictionary=json.dumps(score_dict, ensure_ascii=False))
 
 
+# @app.route('/test/')
+# def test():
+#     score_dict = {}
+#
+#     url = 'http://ichart.yahoo.com/table.csv?s=GOOG&a=0&b=1&c=2000&d=0&e=31&f=2010'
+#
+#     gurl = 'https://www.google.com/finance/company_news?q=NASDAQ%3AAAPL&startdate=2015-3-01&enddate=2015-3-01'
+#
+#     urls_dict = etl.construct_search_url_goog(datetime.datetime(2015, 04, 01), datetime.datetime(2015, 04, 02))
+#
+#     for dl in urls_dict:
+#         articles = news_scrape_goog(urls_dict[dl])
+#
+#         score_dict[dl] = {'articles': articles}
+#
+#         score_dict[dl]['score'] = etl.aggregate_news_sentiment(articles)
+#
+#     # d = etl.get_quotes(url)
+#
+#     return render_template('json.html', dictionary=score_dict)
 
+
+@app.route('/fb/<id_or_name>/')
+def fb(id_or_name):
+    access_token = request.args.get('access_token', None)
+
+    if not access_token:
+        d = {'Error': 'No Access Token provided'}
+    else:
+        d = get_fb_page(id_or_name, access_token)
+
+    # data = json.dumps(d)
+
+    return render_template("default.html", data=json.dumps(d))
+
+
+@app.route('/tweets/<search_term>/')
+def tw(search_term='AAPL', date=str(datetime.date.today())):
+    twits_bydate = {}
+
+    start_date = request.args.get('start_date', None)
+    end_date = request.args.get('end_date', None)
+
+    if not start_date:
+        start_date = datetime.datetime(2015, 04, 01)
+    else:
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+
+    if not end_date:
+        end_date = start_date + datetime.timedelta(days=1)
+    else:
+        end_date = datetime.datetime.strftime(end_date, '%Y-%m-%d')
+
+    d = etl.construct_search_url_tw(start_date, end_date, search_term)
+
+    for dt in d:
+        twits_bydate[dt] = etl.collect_historical_tweets(d[dt])
+
+    return render_template('default.html', data=json.dumps(twits_bydate, ensure_ascii=True))
 
 
 if __name__ == '__main__':
