@@ -10,8 +10,7 @@ def manage():
 
     data = etl.prepare_data_for_modeling()
 
-    data = normalize_matrix(data)
-
+    m_data = normalize_matrix(data)
 
 
 

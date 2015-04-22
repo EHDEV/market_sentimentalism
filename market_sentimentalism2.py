@@ -116,7 +116,7 @@ def get_sentiment(ticker=None):
 
         score_dict[dl]['score'] = etl.aggregate_news_sentiment(articles)
 
-    file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily.json')
+    file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily_train.json')
 
     with open(file_path, 'w+') as file:
         json.dump(score_dict, file)

@@ -155,7 +155,7 @@ def prepare_data_for_modeling():
         print e.message
 
     try:
-        file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily.json')
+        file_path = path.join(path.dirname(__file__), 'data/sentiment_scores_daily_test.json')
 
         with open(file_path) as fp:
             sent_dict = json.load(fp)
