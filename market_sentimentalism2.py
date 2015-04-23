@@ -46,7 +46,7 @@ def get_sentiment(ticker=None):
     if ticker:
         print 'ticker is ', ticker
 
-    return render_template('highcharts1.html', dictionary=json.dumps(score_dict, ensure_ascii=False))
+    return render_template('highcharts2.html', dictionary=json.dumps(score_dict, ensure_ascii=False))
 
 @app.route('/fb/<id_or_name>/')
 def fb(id_or_name):

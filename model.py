@@ -55,7 +55,7 @@ def linear_reg(data):
     if percentage_diff > .025:
         recom = 1
 
-    elif percentage_diff < -.025:
+    elif .025 > percentage_diff > -.025:
         recom = 0
 
     else:
@@ -64,10 +64,10 @@ def linear_reg(data):
 
     stats['recommendation'] = recom
 
-    x_new, pval = feature_selection(x, y)
+    x_new = feature_selection(x, y)
 
     print x_new.shape
-    print x_new, pval
+    print x_new
 
     return stats
 
@@ -89,8 +89,8 @@ def normalize_matrix(data):
 
 def feature_selection(x, y):
 
-     x_new, pval = SelectKBest(f_regression, k=3).fit_transform(x, y)
+     x_new = SelectKBest(f_regression, k=3).fit_transform(x, y)
 
-     return x_new, pval
+     return x_new
 
 
