@@ -1,9 +1,10 @@
 __author__ = 'eliashussen'
 
 import numpy as np
-import pandas as p
 from sklearn import linear_model, svm, tree
-import etl
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_regression
+
 
 
 def linear_reg(data):
@@ -11,6 +12,8 @@ def linear_reg(data):
     # data = etl.prepare_data_for_modeling()
 
     stats = {}
+    orig_data = data.values
+    variables = data.columns
 
     m_data = normalize_matrix(data)
 
@@ -38,10 +41,16 @@ def linear_reg(data):
              'rmse': np.round(np.sqrt((lr.predict(xtest) - ytest) ** 2)[0], 4),
              'variance score': lr.score(xtest, ytest),
              'actual': np.round(ytest[0]),
-             'predicted': np.round(lr.predict(xtest)[0])
+             'predicted': np.round(lr.predict(xtest)[0]),
+             'target': 'Open Price',
+             'features': ['trend', 'score', 'Close', 'Volume']
              }
 
-    percentage_diff = (stats['predicted'] - stats['actual']) / stats['actual']
+    # From today's close price vs tomorrow's predicted open price
+
+    # E.g. (100 - 98)/98
+
+    percentage_diff = (stats['predicted'] - orig_data[-1, 2]) / float(orig_data[-1, 2])
 
     if percentage_diff > .025:
         recom = 1
@@ -51,8 +60,14 @@ def linear_reg(data):
 
     else:
         recom = -1
+    #
 
     stats['recommendation'] = recom
+
+    x_new, pval = feature_selection(x, y)
+
+    print x_new.shape
+    print x_new, pval
 
     return stats
 
@@ -71,4 +86,11 @@ def normalize_matrix(data):
         data_m[:, c] = col
 
     return data_m
+
+def feature_selection(x, y):
+
+     x_new, pval = SelectKBest(f_regression, k=3).fit_transform(x, y)
+
+     return x_new, pval
+
 
