@@ -16,15 +16,12 @@ from collections import defaultdict
 
 
 def get_quotes(start_date='2015-04-01', end_date='2015-04-21', ticker='AAPL'):
-    # ud = u.urlopen('http://ichart.yahoo.com/table.csv?s=GOOG&a=0&b=2&c=2015&d=17&e=3&f=2015')
 
-    d = r.get('http://ichart.yahoo.com/table.csv?s=AAPL&a=01&b=04&c=2015&d=21&e=04&f=2015')
+    d = r.get('http://ichart.yahoo.com/table.csv?s={0}&a=01&b=04&c=2015&d=21&e=04&f=2015'.format(ticker))
 
     dat = d.content
 
     csd = str(dat).strip("b'").encode('utf-8')
-
-    # lines = csd.split('\\n')
 
     data = StringIO(csd)
 
@@ -68,8 +65,8 @@ def construct_search_url_tw(search_term, start_date, end_date=datetime.date.toda
     end_date = start_date + datetime.timedelta(days=1)
 
     for i, d in enumerate(date_list):
-        g_url = "https://twitter.com/search?q={0}%20from%3Ayahoofinance%20since%3A{1}%20until%3A{2}&src=typd".format(
-            search_term, start_date, end_date)
+        g_url = "https://twitter.com/search?q={0}%20since%3A{1}%20until%3A{2}&src=typd".format(
+            search_term, start_date.date(), end_date.date())
         start_date = end_date
         end_date = start_date + datetime.timedelta(days=1)
 
@@ -184,12 +181,6 @@ def prepare_data_for_modeling():
     del df_fuller['Date']
 
     df_fuller = df_fuller.set_index('date')
-    # try:
-    #     file_path = path.join(path.dirname(__file__), 'data/goog_trends.csv')
-    #     quotes = p.read_csv(file_path)
-    #
-    # except IOError as e:
-    #     print e.message
 
     file_path = path.join(path.dirname(__file__), 'data/train_test_complete.csv')
 

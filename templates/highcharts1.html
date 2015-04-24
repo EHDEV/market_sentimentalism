@@ -1,9 +1,14 @@
 {% block includes %}
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 {% endblock %}
 
@@ -13,17 +18,73 @@
     var d = JSON.parse('{{ dictionary | safe}}');
 
     var cat = Object.keys(d);
-    var data = [];
+    var scores = [];
+    var dates = [];
+    var trends = [];
+    var opens = [];
+    var volume = [];
+
+    var colors =  ['#d73027',
+                '#f46d43',
+                '#fdae61',
+                '#fee090',
+                '#ffffbf',
+                '#e0f3f8',
+                '#abd9e9',
+                '#74add1',
+                '#4575b4'];
+
 
     for (var key in d)  {
         console.log(key);
-        data.push(d[key]['score'])
+        scores.push(d[key]['score']);
+        dates.push(d[key]['date']);
+        opens.push(d[key]['Open']);
+        trends.push(d[key]['trend']);
+        volume.push(d[key]['Volume']);
+
     }
 
+    function draw_open_price_chart() {
 
-    $(document).ready(
-        $(function () {
-            $('#container').highcharts({
+        $('#container00').highcharts({
+                title: {
+                    text: 'Daily Opening Stock Prices for Apple Inc.',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Yahoo Finance',
+                    x: -20
+                },
+                xAxis: {
+                    categories: dates
+                },
+                yAxis: {
+                    title: {
+                        text: 'Open Prices'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#4575b4'
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Open Prices',
+                    data: opens,
+                    color: colors[0]
+                }]
+            });
+    }
+    function draw_sentiment_chart() {
+
+        $('#container0').highcharts({
                 title: {
                     text: 'Daily News Sentiment of Apple Inc.',
                     x: -20 //center
@@ -33,16 +94,16 @@
                     x: -20
                 },
                 xAxis: {
-                    categories: cat
+                    categories: dates
                 },
                 yAxis: {
                     title: {
-                        text: 'Seniment Score'
+                        text: 'Seniment Scores'
                     },
                     plotLines: [{
                         value: 0,
                         width: 1,
-                        color: '#3182bd'
+                        color: colors[3]
                     }]
                 },
                 tooltip: {
@@ -51,21 +112,227 @@
                 credits: {
                     enabled: false
                 },
-                legend: {
-                    layout: 'vertical',
-                    align: 'center',
-                    verticalAlign: 'bottom',
-                    borderWidth: 0
-                },
                 series: [{
                     name: 'News Sentiment Score',
-                    data: data
+                    data: scores,
+                    color: colors[2]
                 }]
             });
-        }))
+    }
+    function draw_trend_chart() {
+
+        $('#container1').highcharts({
+                title: {
+                    text: 'Daily Google Trends for Search Terms Describing Apple Inc.',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Search Trends from Google',
+                    x: -20
+                },
+                xAxis: {
+                    categories: dates
+                },
+                yAxis: {
+                    title: {
+                        text: 'Trend (Scaled 0 - 100)'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: colors[7]
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Google Trends',
+                    data: trends,
+                    color: colors[8]
+                }]
+            });
+    }
+    function draw_volume_chart() {
+
+        $('#container2').highcharts({
+                title: {
+                    text: 'Daily Trading Volume of Apple Inc. Stocks',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Yahoo Finance',
+                    x: -20
+                },
+                xAxis: {
+                    categories: dates
+                },
+                yAxis: {
+                    title: {
+                        text: 'Volume'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        'color': colors[1]
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Volume',
+                    data: volume,
+                    color: colors[6]
+                }]
+            });
+    }
+{#    function draw_chart4() {#}
+{##}
+{#        $('#container3').highcharts({#}
+{#                title: {#}
+{#                    text: 'Daily News Sentiment of Apple Inc.',#}
+{#                    x: -20 //center#}
+{#                },#}
+{#                subtitle: {#}
+{#                    text: 'Source: Yahoo Finance, News. Sentiment Score Calculated using AlchemyAPI',#}
+{#                    x: -20#}
+{#                },#}
+{#                xAxis: {#}
+{#                    categories: dates#}
+{#                },#}
+{#                yAxis: {#}
+{#                    title: {#}
+{#                        text: 'Seniment Score'#}
+{#                    },#}
+{#                    plotLines: [{#}
+{#                        value: 0,#}
+{#                        width: 1,#}
+{#                        color: colors[5]#}
+{#                    }]#}
+{#                },#}
+{#                tooltip: {#}
+{#                    valueSuffix: ''#}
+{#                },#}
+{#                credits: {#}
+{#                    enabled: false#}
+{#                },#}
+{#                series: [{#}
+{#                    name: 'News Sentiment Score',#}
+{#                    data: scores#}
+{#                }]#}
+{#            });#}
+{#    }#}
+
+{#    Highcharts.setOptions({#}
+{#        colors: [#}
+{#                '#74add1',#}
+{#                '#4575b4',#}
+{#                '#ffffbf',#}
+{#                '#e0f3f8',#}
+{#                '#abd9e9',#}
+{#                ]#}
+{#        });#}
+    $(document).ready(
+        function () {
+
+            draw_open_price_chart();
+            draw_sentiment_chart();
+            draw_trend_chart();
+            draw_volume_chart();
+{#            draw_chart4()#}
+
+        }
+       );
+
 </script>
 
-<div id="container" style="min-width: 310px; height: 320px; margin: 0 auto"></div>
-<div id="container2" style="min-width: 310px; height: 320px; margin: 0 auto"></div>
+ <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"> Open Prices for April</h3>
+    </div>
+    <div class="panel-body">
+        <div id="container00" style="min-width: 310px; height: 250px; margin: 0 auto"></div>
+    </div>
+ </div>
 
+<div class="container">
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse"
+          href="#collapseOne">
+          Sentiment Chart
+        </a>
+      </h3>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+        <div id="container0" style="min-width: 310px; height: 350px; margin: 0 auto"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse"
+          href="#collapseTwo">
+          Trends Chart
+        </a>
+      </h3>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse in">
+      <div class="panel-body">
+        <div id="container1" style="min-width: 310px; height: 350px; margin: 0 auto"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseThree">
+          Volume Chart
+        </a>
+      </h3>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse in">
+      <div class="panel-body">
+        <div id="container2" style="min-width: 310px; height: 350px; margin: 0 auto"></div>
+      </div>
+    </div>
+  </div>
+{#</div>#}
+{#<div class="row">#}
+{#    <div class="col-lg-12">#}
+{#        <table id="output" data-sort="true" style="width: 100%">#}
+{#                        <thead>#}
+{#                        {% for colname in dictionary[0] %}#}
+{#                            <th>#}
+{#                                {{ colname }}#}
+{#                            </th>#}
+{#                        {% endfor %}#}
+{#                        </thead>#}
+{#                        <tbody>#}
+                        {#                        {% for row in output %}#}
+{#                       {% for row in dictionary %}#}
+{#                            <tr>#}
+{#                                {% for datapoint in dictionary.row %}#}
+{##}
+{#                                    <td>{{ dictionary.row.datapoint }}</td>#}
+{#                                {% endfor %}#}
+{#                            </tr>#}
+{#                       {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
+{#</div>#}
+</div>
+</div>
 {% endblock %}

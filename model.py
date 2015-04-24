@@ -6,9 +6,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_regression
 
 
-
 def linear_reg(data):
-
     # data = etl.prepare_data_for_modeling()
 
     stats = {}
@@ -26,7 +24,7 @@ def linear_reg(data):
     x = m_data[:-1:, li]
 
     xtest = m_data[-1, li]
-    ytest = np.array(m_data[-1, 3]).reshape(1,)
+    ytest = np.array(m_data[-1, 3]).reshape(1, )
 
     lr.fit(x, y)
 
@@ -73,24 +71,22 @@ def linear_reg(data):
 
 
 def normalize_matrix(data):
-
     data_m = data.values
 
     li = range(data_m.shape[1])
     li.remove(3)
 
     for c in li:
-
         col = (data_m[:, c] - np.min(data_m[:, c])) / (np.max(data_m[:, c]) - np.min(data_m[:, c]))
 
         data_m[:, c] = col
 
     return data_m
 
+
 def feature_selection(x, y):
+    x_new = SelectKBest(f_regression, k=2).fit_transform(x, y)
 
-     x_new = SelectKBest(f_regression, k=3).fit_transform(x, y)
-
-     return x_new
+    return x_new
 
 

@@ -46,7 +46,8 @@ def get_sentiment(ticker=None):
     if ticker:
         print 'ticker is ', ticker
 
-    return render_template('highcharts2.html', dictionary=json.dumps(score_dict, ensure_ascii=False))
+    return render_template('highcharts1.html', dictionary=json.dumps(score_dict, ensure_ascii=False))
+
 
 @app.route('/fb/<id_or_name>/')
 def fb(id_or_name):
@@ -63,7 +64,7 @@ def fb(id_or_name):
 
 
 @app.route('/tweets/<search_term>/')
-def tw(search_term='AAPL', date=str(datetime.date.today())):
+def tw(search_term='AAPL'):
     twits_bydate = {}
 
     start_date = request.args.get('start_date', None)
@@ -77,23 +78,34 @@ def tw(search_term='AAPL', date=str(datetime.date.today())):
     if not end_date:
         end_date = start_date + datetime.timedelta(days=1)
     else:
-        end_date = datetime.datetime.strftime(end_date, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
 
-    d = etl.construct_search_url_tw(start_date, end_date, search_term)
+    d = etl.construct_search_url_tw(search_term, start_date, end_date)
 
     for dt in d:
         twits_bydate[dt] = etl.collect_historical_tweets(d[dt])
 
+    return render_template('default.html', data=json.dumps(twits_bydate))
 
-    return render_template('default.html', data=json.dumps(twits_bydate, ensure_ascii=True))
 
-
-@app.route('/test/')
+@app.route('/forecast/')
 def test():
     d = etl.prepare_data_for_modeling()
     res = model.linear_reg(d)
 
     return render_template('default.html', data=json.dumps(res))
+
+
+@app.route('/dashboard/')
+def sentiment_dashboard():
+    data = etl.prepare_data_for_modeling()
+
+    data['date'] = data.index
+
+    dat_dict = data.to_dict(orient='records')
+
+    return render_template('highcharts1.html', dictionary=json.dumps(dat_dict))
+
 
 if __name__ == '__main__':
     app.run()
