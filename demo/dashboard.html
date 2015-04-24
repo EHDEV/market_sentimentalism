@@ -1,0 +1,196 @@
+
+
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+
+
+
+<script type="text/javascript">
+    var d = JSON.parse('[{"trend": 64, "Volume": 40621400, "score": 1.45, "date": "2015-04-01", "Close": 124.25, "Open": 124.82}, {"trend": 62, "Volume": 32220100, "score": 1.7, "date": "2015-04-02", "Close": 125.32, "Open": 125.03}, {"trend": 68, "Volume": 37194000, "score": 1.09, "date": "2015-04-06", "Close": 127.35, "Open": 124.47}, {"trend": 68, "Volume": 35012300, "score": 2.22, "date": "2015-04-07", "Close": 126.01, "Open": 127.64}, {"trend": 71, "Volume": 37329200, "score": 0.3, "date": "2015-04-08", "Close": 125.6, "Open": 125.85}, {"trend": 78, "Volume": 32484000, "score": 0.61, "date": "2015-04-09", "Close": 126.56, "Open": 125.85}, {"trend": 100, "Volume": 40188000, "score": 1.25, "date": "2015-04-10", "Close": 127.1, "Open": 125.95}, {"trend": 75, "Volume": 36365100, "score": 1.18, "date": "2015-04-13", "Close": 126.85, "Open": 128.37}, {"trend": 71, "Volume": 25524600, "score": 1.32, "date": "2015-04-14", "Close": 126.3, "Open": 127.0}, {"trend": 67, "Volume": 28848900, "score": 1.47, "date": "2015-04-15", "Close": 126.78, "Open": 126.41}, {"trend": 67, "Volume": 27895300, "score": 0.35, "date": "2015-04-16", "Close": 126.17, "Open": 126.28}, {"trend": 67, "Volume": 51323900, "score": 0.93, "date": "2015-04-17", "Close": 124.75, "Open": 125.55}, {"trend": 67, "Volume": 46934400, "score": 2.2, "date": "2015-04-20", "Close": 127.6, "Open": 125.57}]');
+
+    var cat = Object.keys(d);
+    var scores = [];
+    var dates = [];
+    var trends = [];
+    var opens = [];
+    var volume = [];
+
+    var colors =  ['#d73027',
+                '#f46d43',
+                '#fdae61',
+                '#fee090',
+                '#ffffbf',
+                '#e0f3f8',
+                '#abd9e9',
+                '#74add1',
+                '#4575b4'];
+
+
+    for (var key in d)  {
+        console.log(key);
+        scores.push(d[key]['score']);
+        dates.push(d[key]['date']);
+        opens.push(d[key]['Open']);
+        trends.push(d[key]['trend']);
+        volume.push(d[key]['Volume']);
+
+    }
+
+    function draw_open_price_chart() {
+
+        $('#container00').highcharts({
+                title: {
+                    text: 'Daily Opening Stock Prices for Apple Inc.',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Yahoo Finance',
+                    x: -20
+                },
+                xAxis: {
+                    categories: dates
+                },
+                yAxis: {
+                    title: {
+                        text: 'Open Prices'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#4575b4'
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Open Prices',
+                    data: opens,
+                    color: colors[0]
+                }]
+            });
+    }
+    function draw_sentiment_chart() {
+
+        $('#container0').highcharts({
+                title: {
+                    text: 'Daily News Sentiment of Apple Inc.',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Yahoo Finance, News. Sentiment Score Calculated using AlchemyAPI',
+                    x: -20
+                },
+                xAxis: {
+                    categories: dates
+                },
+                yAxis: {
+                    title: {
+                        text: 'Seniment Scores'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: colors[3]
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'News Sentiment Score',
+                    data: scores,
+                    color: colors[2]
+                }]
+            });
+    }
+    function draw_trend_chart() {
+
+        $('#container1').highcharts({
+                title: {
+                    text: 'Daily Google Trends for Search Terms Describing Apple Inc.',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Search Trends from Google',
+                    x: -20
+                },
+                xAxis: {
+                    categories: dates
+                },
+                yAxis: {
+                    title: {
+                        text: 'Trend (Scaled 0 - 100)'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: colors[7]
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Google Trends',
+                    data: trends,
+                    color: colors[8]
+                }]
+            });
+    }
+    function draw_volume_chart() {
+
+        $('#container2').highcharts({
+                title: {
+                    text: 'Daily Trading Volume of Apple Inc. Stocks',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'Source: Yahoo Finance',
+                    x: -20
+                },
+                xAxis: {
+                    categories: dates
+                },
+                yAxis: {
+                    title: {
+                        text: 'Volume'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        'color': colors[1]
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Volume',
+                    data: volume,
+                    color: colors[6]
+                }]
+            });
+    }
