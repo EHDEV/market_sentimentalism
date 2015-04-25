@@ -11,3 +11,5 @@ To get started all you have to do is clone this repo cd into the project directo
 pip install -r requirements.txt
 
 ```
+
+requirements.txt has listed all the libraries that you'd want install to get started.
