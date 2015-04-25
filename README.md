@@ -23,7 +23,7 @@ python marketsentimentalism2.py
 ```
 
 This will run your localhost server which will allow you to make http requests from your browser as follows. For example to see the dashboard, go to the address, 
-```
-http://localhost:5000/dashboard/.
-```
+
+(http://localhost:5000/dashboard/)
+
 
